@@ -22,7 +22,9 @@ RUN mkdir /run/sshd && \
 # Créer le script de démarrage
 RUN echo "#!/bin/bash\n\
 /usr/sbin/sshd &\n\
-cloudflared tunnel --url ssh://localhost:22 --no-autoupdate --metrics 127.0.0.1:42679 &" > /start.sh
+cloudflared tunnel --url ssh://localhost:22 --no-autoupdate --metrics 127.0.0.1:42679 &\n\
+sleep 5\n\
+curl --silent --show-error http://localhost:42679/metrics " > /start.sh
 
 # Rendre le script exécutable
 RUN chmod +x /start.sh
