@@ -8,12 +8,10 @@ ENV LANG en_US.utf8
 # Installer les outils nécessaires
 RUN apt install -y ssh wget unzip curl jq
 
-# Télécharger et installer ngrok
-RUN wget -O ngrok.zip https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip && \
-    unzip ngrok.zip && rm ngrok.zip && mv ngrok /usr/local/bin/ngrok
-
-# Ajouter le token ngrok (assurez-vous que le token est correct)
-RUN ngrok config add-authtoken 2qNtOvSgrSPDocCdIRJ6opFcJPi_4Z3uUvTpbj2b6jFeALyHz
+# Télécharger et installer cloudflared
+RUN wget https://github.com/cloudflare/cloudflared/releases/download/2024.9.1/cloudflared-linux-amd64.deb && \
+    dpkg -i cloudflared-linux-amd64.deb && \
+    rm cloudflared-linux-amd64.deb
 
 # Configurer SSH pour autoriser la connexion root
 RUN mkdir /run/sshd && \
@@ -24,9 +22,9 @@ RUN mkdir /run/sshd && \
 # Créer le script de démarrage
 RUN echo "#!/bin/bash\n\
 /usr/sbin/sshd &\n\
-ngrok tcp 22 > /dev/null &\n\
+cloudflared tunnel --url ssh://localhost:22 --no-autoupdate --metrics 127.0.0.1:42679 &\n\
 sleep 5\n\
-curl --silent --show-error http://localhost:4040/api/tunnels | jq '.tunnels[0].public_url'" > /start.sh
+curl --silent --show-error http://localhost:42679/metrics | jq '.tunnels[0].url'" > /start.sh
 
 # Rendre le script exécutable
 RUN chmod +x /start.sh
