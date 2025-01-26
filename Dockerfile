@@ -10,4 +10,4 @@ RUN wget -qO /bin/ttyd https://github.com/tsl0922/ttyd/releases/download/1.7.3/t
 EXPOSE 8000
 RUN echo $CREDENTIAL > /tmp/debug
 
-CMD ["/bin/bash", "-c", "/bin/ttyd -p $PORT -c root:root /bin/bash"]
+CMD ["/bin/bash", "-c", "/bin/ttyd -p 8000 -c root:root /bin/bash"]
